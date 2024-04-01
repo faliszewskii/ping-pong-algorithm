@@ -5,6 +5,8 @@ use ping_pong::ping_pong_arguments::PingPongArguments;
 
 use crate::console_interface::ConsoleInterface;
 use crate::data_parser::DataParser;
+use crate::matrix::naive_mul::naive_mul;
+use crate::ping_pong::ping_pong_solver::PingPongSolver;
 
 mod console_interface;
 mod data_parser;
@@ -24,11 +26,19 @@ fn main() {
         }
     };
 
+
+    let solver = PingPongSolver::new(naive_mul);
+
+    let mut results = Vec::new();
     for graph in graphs {
-        print!("{:?}", graph);
+        print!("{:}", graph);
+        let result = solver.solve(&graph);
+        println!("{:?}", result);
+        println!();
+        results.push(solver.solve(&graph));
     }
 
-    print!("{}, {:?}", arguments.input_file, arguments.output_file);
+    println!("{}, {:?}", arguments.input_file, arguments.output_file);
 }
 
 fn read_arguments() -> PingPongArguments {

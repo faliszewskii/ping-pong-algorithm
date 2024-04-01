@@ -1,2 +1,2 @@
 pub mod ping_pong_arguments;
-mod ping_pong;
+pub mod ping_pong_solver;

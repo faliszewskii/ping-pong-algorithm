@@ -93,6 +93,18 @@ impl<T: fmt::Debug + Clone > fmt::Debug for Matrix<T> {
     }
 }
 
+impl<T: fmt::Display + Clone > fmt::Display for Matrix<T> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        for row in 0..self.rows {
+            for col in 0..self.cols {
+                write!(f, "{:>2} ", self[col][row])?;
+            }
+            writeln!(f)?;
+        }
+        Ok(())
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use crate::matrix::matrix::Matrix;

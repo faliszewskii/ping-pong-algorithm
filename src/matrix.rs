@@ -1,2 +1,2 @@
 pub mod matrix;
-mod naive_mul;
+pub mod naive_mul;
