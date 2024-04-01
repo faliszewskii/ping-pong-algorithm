@@ -1,6 +1,6 @@
 use getopts::Options;
 
-use crate::ping_pong_arguments::PingPongArguments;
+use crate::ping_pong::ping_pong_arguments::PingPongArguments;
 
 pub struct ConsoleInterface {
     options: Options
@@ -47,15 +47,13 @@ impl ConsoleInterface {
             }
         };
 
-        let output_file = match matches.opt_str("i") {
+        let output_file = match matches.opt_str("o") {
             Some(file) => file,
             None => {
-                eprintln!("Output file not specified");
-                ConsoleInterface::print_usage(&program, &self.options);
-                return None;
+                return Some(PingPongArguments::new(input_file.as_str(), None))
             }
         };
 
-        Some(PingPongArguments::new(input_file.as_str(), output_file.as_str()))
+        Some(PingPongArguments::new(input_file.as_str(), Some(output_file)))
     }
 }
