@@ -1,53 +1,58 @@
 use std::env;
 use std::process::exit;
 
-use ping_pong::ping_pong_arguments::PingPongArguments;
 
-use crate::console_interface::ConsoleInterface;
 use crate::data_parser::DataParser;
 use crate::matrix::naive_mul::naive_mul;
 use crate::ping_pong::ping_pong_solver::PingPongSolver;
+use crate::console::parse_console_arguments;
+use crate::console_arguments::ConsoleArguments;
 
-mod console_interface;
 mod data_parser;
 mod graph;
 mod matrix;
 mod ping_pong;
+mod console;
+mod console_arguments;
 
 fn main() {
+    let arguments = parse_console_arguments();
 
-    let arguments = read_arguments();
+    match arguments {
+        ConsoleArguments::Solve(solve_args) => {
 
-    let graphs = match DataParser::parse_graph_input(&arguments.input_file) {
-        Ok(graphs) => graphs,
-        Err(e) => {
-            eprintln!("IO error: {}", e);
-            exit(1);
+            let graphs: Vec<_> = solve_args.input_files.iter().map(|input| {
+                match DataParser::parse_graph_input(&input) {
+                    Ok(graphs) => graphs,
+                    Err(e) => {
+                        eprintln!("IO error: {}", e);
+                        exit(1);
+                    }
+                }}).flatten().collect();
+
+            let solver = PingPongSolver::new(naive_mul);
+
+            let results: Vec<_> = graphs.iter()
+                .map(|g| {
+                    if solve_args.verbose { print!("{:}", g); }
+                    let result = solver.solve(&g);
+                    if solve_args.verbose || solve_args.output_file.is_none() {
+                        println!("{:?}", result);
+                        if solve_args.verbose { println!() }
+                    }
+                    result
+                })
+                .collect();
+
+            match solve_args.output_file {
+                None => {}
+                Some(output) => {
+                    // TODO Save results to file
+                }
+            }
         }
-    };
-
-
-    let solver = PingPongSolver::new(naive_mul);
-
-    let mut results = Vec::new();
-    for graph in graphs {
-        print!("{:}", graph);
-        let result = solver.solve(&graph);
-        println!("{:?}", result);
-        println!();
-        results.push(solver.solve(&graph));
-    }
-
-    println!("{}, {:?}", arguments.input_file, arguments.output_file);
-}
-
-fn read_arguments() -> PingPongArguments {
-    // Read console arguments
-    // ping_pong -i example.txt -o result.txt
-    let console_args: Vec<String> = env::args().collect();
-    let mut console_interface = ConsoleInterface::new();
-    match console_interface.parse_arguments(console_args) {
-        Some(arguments) => arguments,
-        None => exit(0)
+        ConsoleArguments::Generate(_) => {
+            todo!()
+        }
     }
 }
