@@ -8,3 +8,4 @@ edition = "2021"
 [dependencies]
 getopts = "0.2.21"
 clap = "4.5.4"
+rand = "0.9.0-alpha.1"
