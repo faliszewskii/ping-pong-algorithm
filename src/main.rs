@@ -3,7 +3,7 @@ use std::io::Write;
 use std::process::exit;
 
 use crate::console::parse_console_arguments;
-use crate::console_arguments::ConsoleArguments;
+use crate::console_arguments::{ConsoleArguments, MultiplicationMethod};
 use crate::data_parser::DataParser;
 use crate::graph::generator::generate_ping_pong;
 use crate::graph::graph::Graph;
@@ -32,14 +32,17 @@ fn main() {
                     }
                 }}).flatten().collect();
 
-            let solver = PingPongSolver::new(naive_mul);
+            let solver = PingPongSolver::new(match solve_args.mul_method {
+                MultiplicationMethod::Naive => naive_mul,
+                MultiplicationMethod::Strassen => {unimplemented!("Strassen to be implemented")}
+            });
 
             let results: Vec<_> = graphs.iter()
                 .map(|g| {
                     if solve_args.verbose { print!("{:}", g); }
                     let result = solver.solve(&g);
                     if solve_args.verbose || solve_args.output_file.is_none() {
-                        println!("{:?}", result);
+                        println!("{:?}", result.iter().map(|i| i+1).collect::<Vec<_>>());
                         if solve_args.verbose { println!() }
                     }
                     result
@@ -83,7 +86,7 @@ fn save_graphs_to_file(graphs: Vec<Graph>, output: String) {
 fn save_results_to_file(results: Vec<Vec<i32>>, output: String) {
     let formatted_string: String = results
         .iter()
-        .map(|inner_vec| inner_vec.iter().map(ToString::to_string).collect::<Vec<String>>().join(" "))
+        .map(|inner_vec| inner_vec.iter().map(|i|i+1).map(|arg0: i32| ToString::to_string(&arg0)).collect::<Vec<String>>().join(" "))
         .chain(vec![String::new()])
         .collect::<Vec<String>>()
         .join("\n");

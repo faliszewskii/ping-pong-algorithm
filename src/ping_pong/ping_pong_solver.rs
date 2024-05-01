@@ -14,19 +14,20 @@ impl PingPongSolver {
     pub fn solve(&self, input: &Graph) -> Vec<i32> {
         let a = &input.adj_matrix;
         let a_sq = (self.multiplication_algorithm)(&a, &a);
-        let n = a.cols();
+        let n = a.rows();
         let mut result = Vec::new();
 
-        for col in 0..n {
+        // We are looking for rows which have the X property.
+        for row in 0..n {
             let mut has_x = true;
-            for row in 0..n {
+            for col in 0..n {
                 if col != row && a[col][row] == 0 && a_sq[col][row] == 0 {
                     has_x = false;
                     break;
                 }
             }
             if has_x {
-                result.push(col as i32);
+                result.push(row as i32);
             }
         }
         result
