@@ -1,6 +1,8 @@
 use std::fmt;
-use std::ops::{Index, IndexMut};
+use std::ops::{Index, IndexMut, Sub, Add};
 
+
+#[derive(Clone)]
 pub struct Matrix<T: Clone> {
     cols: usize,
     rows: usize,
@@ -102,6 +104,47 @@ impl<T: fmt::Display + Clone > fmt::Display for Matrix<T> {
             writeln!(f)?;
         }
         Ok(())
+    }
+}
+
+
+impl<T: Sub<Output = T> + Copy + Default> Sub for &Matrix<T> {
+    type Output = Matrix<T>;
+
+    fn sub(self, rhs: Self) -> Self::Output {
+        assert_eq!(self.cols, rhs.cols, "Different column number");
+        assert_eq!(self.rows, rhs.rows, "Different rows number");
+
+        let mut result = Matrix::new(self.cols, self.rows);
+
+        for col in 0..self.cols {
+            for row in 0..self.rows {
+                result[col][row] = self[col][row] - rhs[col][row];
+            }
+        }
+
+        result
+    }
+}
+
+
+impl<T: Add<Output = T> + Copy + Default> Add for &Matrix<T>
+{
+    type Output = Matrix<T>;
+
+    fn add(self, rhs: Self) -> Matrix<T> {
+        assert_eq!(self.cols, rhs.cols, "Different column number");
+        assert_eq!(self.rows, rhs.rows, "Different rows number");
+
+        let mut result = Matrix::new(self.cols, self.rows);
+
+        for col in 0..self.cols {
+            for row in 0..self.rows {
+                result[col][row] = self[col][row] + rhs[col][row];
+            }
+        }
+
+        result
     }
 }
 
