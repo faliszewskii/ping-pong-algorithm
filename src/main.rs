@@ -8,6 +8,7 @@ use crate::data_parser::DataParser;
 use crate::graph::generator::generate_ping_pong;
 use crate::graph::graph::Graph;
 use crate::matrix::naive_mul::naive_mul;
+use crate::matrix::strassen_mul::strassen_mul;
 use crate::ping_pong::ping_pong_solver::PingPongSolver;
 
 mod data_parser;
@@ -34,7 +35,7 @@ fn main() {
 
             let solver = PingPongSolver::new(match solve_args.mul_method {
                 MultiplicationMethod::Naive => naive_mul,
-                MultiplicationMethod::Strassen => {unimplemented!("Strassen to be implemented")}
+                MultiplicationMethod::Strassen => strassen_mul
             });
 
             let results: Vec<_> = graphs.iter()

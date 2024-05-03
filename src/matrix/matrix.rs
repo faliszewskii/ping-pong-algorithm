@@ -1,6 +1,8 @@
 use std::fmt;
-use std::ops::{Index, IndexMut};
+use std::ops::{Index, IndexMut, Sub, Add};
 
+
+#[derive(Clone)]
 pub struct Matrix<T: Clone> {
     cols: usize,
     rows: usize,
