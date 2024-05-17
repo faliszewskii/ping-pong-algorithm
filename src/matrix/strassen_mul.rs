@@ -129,13 +129,31 @@ mod tests {
 
 
     #[test]
-    pub fn correct_mul() {
+    pub fn correct_mul_mat_size_4() {
         let rows = 3;
         let cols = 3;
         let m1: Matrix<i32> = Matrix::with_flat_data(cols as usize, (1..=rows*cols).collect());
         let m2: Matrix<i32> = Matrix::with_flat_data(rows as usize, (1..=rows*cols).rev().collect());
 
-        let expected = Matrix::with_data(vec![vec![90, 114, 138], vec![54, 69, 84], vec![18, 24, 30]]);
+        let expected = Matrix::with_data(vec![
+            vec![90, 114, 138, 0],
+            vec![54, 69, 84, 0],
+            vec![18, 24, 30, 0],
+            vec![0, 0, 0, 0],
+        ]);
+
+        assert_eq!(expected, strassen_mul(&m1, &m2));
+    }
+
+
+    #[test]
+    pub fn correct_mul_mat_size_2() {
+        let rows = 2;
+        let cols = 2;
+        let m1: Matrix<i32> = Matrix::with_flat_data(cols as usize, (1..=rows*cols).collect());
+        let m2: Matrix<i32> = Matrix::with_flat_data(rows as usize, (1..=rows*cols).rev().collect());
+
+        let expected = Matrix::with_data(vec![vec![13, 20], vec![5, 8]]);
 
         assert_eq!(expected, strassen_mul(&m1, &m2));
     }
