@@ -180,6 +180,20 @@ mod tests {
 
 
     #[test]
+    pub fn mut_returns_matrix_with_same_size_as_arguments() {
+        for size in 1..=100 {
+            let m1 = Matrix::new(size, size);
+            let m2 = Matrix::new(size, size);
+
+            let mul = strassen_mul(&m1, &m2);
+
+            assert_eq!(mul.cols(), size);
+            assert_eq!(mul.rows(), size);
+        }
+    }
+
+
+    #[test]
     pub fn correct_connecting_4_matrices() {
         let m11 = Matrix::with_data(vec![vec![1, 2],  vec![3, 4]]);
         let m12 = Matrix::with_data(vec![vec![5, 6],  vec![7, 8]]);
