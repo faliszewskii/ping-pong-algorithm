@@ -14,19 +14,16 @@ pub fn strassen_mul(a: &Matrix<i32>, b: &Matrix<i32>) -> Matrix<i32> {
         return result;
     }
 
-    let mat_a;
-    let mat_b;
+    let (a11, a12, a21, a22);
+    let (b11, b12, b21, b22);
 
     if a.cols() % 2 != 0 {
-        mat_a = expand_matrix(a);
-        mat_b = expand_matrix(b);
+        (a11, a12, a21, a22) = explode_matrix_to_4(&expand_matrix(a));
+        (b11, b12, b21, b22) = explode_matrix_to_4(&expand_matrix(b));
     } else {
-        mat_a = a.clone();
-        mat_b = b.clone();
+        (a11, a12, a21, a22) = explode_matrix_to_4(&a);
+        (b11, b12, b21, b22) = explode_matrix_to_4(&b);
     }
-
-    let (a11, a12, a21, a22) = explode_matrix_to_4(&mat_a);
-    let (b11, b12, b21, b22) = explode_matrix_to_4(&mat_b);
 
     let s1 = strassen_mul(&(&a21 - &a22), &(&b12 + &b22));
     let s2 = strassen_mul(&(&a11 + &a22), &(&b11 + &b22));
