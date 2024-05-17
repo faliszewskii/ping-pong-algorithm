@@ -9,7 +9,7 @@ pub fn strassen_mul(a: &Matrix<i32>, b: &Matrix<i32>) -> Matrix<i32> {
     // From previous asserts we know that matrices are squares
     if a.cols() == 1 && b.cols() == 1 {
         let mut result = Matrix::new(1, 1);
-        result[0][0] = a[0][0] * a[0][0];
+        result[0][0] = a[0][0] * b[0][0];
 
         return result;
     }
