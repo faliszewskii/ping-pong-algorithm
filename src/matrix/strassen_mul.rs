@@ -6,27 +6,34 @@ pub fn strassen_mul(a: &Matrix<i32>, b: &Matrix<i32>) -> Matrix<i32> {
     assert_eq!(a.cols(), a.rows(), "Only square matrices are supported");
     assert_eq!(b.cols(), b.rows(), "Only square matrices are supported");
     
-    // From previous asserts we know that matrices are squares
+    let result = strassen_mul_impl(&a, &b);
+    
+    if a.cols() % 2 != 0 && a.cols() > 1 {
+        return compress_matrix(&result);
+    }
+
+    return result;
+}
+
+
+fn strassen_mul_impl(a: &Matrix<i32>, b: &Matrix<i32>) -> Matrix<i32> {
     if a.cols() == 1 && b.cols() == 1 {
         let mut result = Matrix::new(1, 1);
-        result[0][0] = a[0][0] * a[0][0];
+        result[0][0] = a[0][0] * b[0][0];
 
         return result;
     }
 
-    let mat_a;
-    let mat_b;
+    let (a11, a12, a21, a22);
+    let (b11, b12, b21, b22);
 
     if a.cols() % 2 != 0 {
-        mat_a = expand_matrix(a);
-        mat_b = expand_matrix(b);
+        (a11, a12, a21, a22) = explode_matrix_to_4(&expand_matrix(a));
+        (b11, b12, b21, b22) = explode_matrix_to_4(&expand_matrix(b));
     } else {
-        mat_a = a.clone();
-        mat_b = b.clone();
+        (a11, a12, a21, a22) = explode_matrix_to_4(&a);
+        (b11, b12, b21, b22) = explode_matrix_to_4(&b);
     }
-
-    let (a11, a12, a21, a22) = explode_matrix_to_4(&mat_a);
-    let (b11, b12, b21, b22) = explode_matrix_to_4(&mat_b);
 
     let s1 = strassen_mul(&(&a21 - &a22), &(&b12 + &b22));
     let s2 = strassen_mul(&(&a11 + &a22), &(&b11 + &b22));
@@ -42,6 +49,20 @@ pub fn strassen_mul(a: &Matrix<i32>, b: &Matrix<i32>) -> Matrix<i32> {
         &(&s4 + &s5),
         &(&(&s2 - &s3) + &(&s5 - &s7))
     );
+}
+
+
+fn compress_matrix(m: &Matrix<i32>) -> Matrix<i32> {
+    let mut result = Matrix::new(m.cols() - 1, m.rows() - 1);
+
+    // Copying data from input matrix
+    for col in 0..result.cols() {
+        for row in 0..result.rows() {
+            result[col][row] = m[col][row];
+        }
+    }
+
+    result
 }
 
 
@@ -129,15 +150,46 @@ mod tests {
 
 
     #[test]
-    pub fn correct_mul() {
+    pub fn correct_mul_mat_size_4() {
         let rows = 3;
         let cols = 3;
         let m1: Matrix<i32> = Matrix::with_flat_data(cols as usize, (1..=rows*cols).collect());
         let m2: Matrix<i32> = Matrix::with_flat_data(rows as usize, (1..=rows*cols).rev().collect());
 
-        let expected = Matrix::with_data(vec![vec![90, 114, 138], vec![54, 69, 84], vec![18, 24, 30]]);
+        let expected = Matrix::with_data(vec![
+            vec![90, 114, 138],
+            vec![54, 69, 84],
+            vec![18, 24, 30],
+        ]);
 
         assert_eq!(expected, strassen_mul(&m1, &m2));
+    }
+
+
+    #[test]
+    pub fn correct_mul_mat_size_2() {
+        let rows = 2;
+        let cols = 2;
+        let m1: Matrix<i32> = Matrix::with_flat_data(cols as usize, (1..=rows*cols).collect());
+        let m2: Matrix<i32> = Matrix::with_flat_data(rows as usize, (1..=rows*cols).rev().collect());
+
+        let expected = Matrix::with_data(vec![vec![13, 20], vec![5, 8]]);
+
+        assert_eq!(expected, strassen_mul(&m1, &m2));
+    }
+
+
+    #[test]
+    pub fn mut_returns_matrix_with_same_size_as_arguments() {
+        for size in 1..=100 {
+            let m1 = Matrix::new(size, size);
+            let m2 = Matrix::new(size, size);
+
+            let mul = strassen_mul(&m1, &m2);
+
+            assert_eq!(mul.cols(), size);
+            assert_eq!(mul.rows(), size);
+        }
     }
 
 
