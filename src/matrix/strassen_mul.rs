@@ -1,10 +1,15 @@
 use crate::matrix::matrix::Matrix;
+use crate::matrix::naive_mul::naive_mul;
 
 
 pub fn strassen_mul(a: &Matrix<i32>, b: &Matrix<i32>) -> Matrix<i32> {
     assert_eq!(a.cols(), b.rows(), "Matrix dimensions mismatch");
     assert_eq!(a.cols(), a.rows(), "Only square matrices are supported");
     assert_eq!(b.cols(), b.rows(), "Only square matrices are supported");
+
+    if a.cols() <= 512 {
+        return naive_mul(&a, &b);
+    }
     
     let result = strassen_mul_impl(&a, &b);
     
