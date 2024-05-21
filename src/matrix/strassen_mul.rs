@@ -7,7 +7,7 @@ pub fn strassen_mul(a: &Matrix<i32>, b: &Matrix<i32>) -> Matrix<i32> {
     assert_eq!(a.cols(), a.rows(), "Only square matrices are supported");
     assert_eq!(b.cols(), b.rows(), "Only square matrices are supported");
 
-    if a.cols() <= 512 {
+    if a.cols() <= 8 {
         return naive_mul(&a, &b);
     }
     
@@ -24,6 +24,8 @@ fn strassen_mul_impl(a: &Matrix<i32>, b: &Matrix<i32>) -> Matrix<i32> {
 
     let mut tmp1 = Matrix::new(a11.cols(), a11.rows());
     let mut tmp2 = Matrix::new(a11.cols(), a11.rows());
+    let mut tmp3 = Matrix::new(a11.cols(), a11.rows());
+    let mut tmp4 = Matrix::new(a11.cols(), a11.rows());
 
     Matrix::sub(&a21, &a22, &mut tmp1);
     Matrix::add(&b12, &b22, &mut tmp2);
@@ -49,11 +51,27 @@ fn strassen_mul_impl(a: &Matrix<i32>, b: &Matrix<i32>) -> Matrix<i32> {
     Matrix::add(&a12, &a22, &mut tmp1);
     let s7 = strassen_mul(&tmp1, &b11);
 
+    // First argument
+    Matrix::add(&s1, &s2, &mut tmp2);
+    Matrix::sub(&s4, &s6, &mut tmp3);
+    Matrix::sub(&tmp2, &tmp3, &mut tmp1);
+
+    // Last argument
+    Matrix::sub(&s2, &s3, &mut tmp2);
+    Matrix::sub(&s5, &s7, &mut tmp3);
+    Matrix::add(&tmp2, &tmp3, &mut tmp4);
+
+    // Second argument
+    Matrix::add(&s6, &s7, &mut tmp2);
+
+    // Third argument
+    Matrix::add(&s4, &s5, &mut tmp3);
+
     let result = connect_4_matrices(
-        &(&(&s1 + &s2) - &(&s4 - &s6)),
-        &(&s6 + &s7),
-        &(&s4 + &s5),
-        &(&(&s2 - &s3) + &(&s5 - &s7))
+        &tmp1,
+        &tmp2,
+        &tmp3,
+        &tmp4
     );
 
     if a.cols() % 2 != 0 {
@@ -178,18 +196,18 @@ mod tests {
 
     #[test]
     pub fn correct_mul_mat_size_4() {
-        let rows = 3;
-        let cols = 3;
+        let rows = 32;
+        let cols = 32;
         let m1: Matrix<i32> = Matrix::with_flat_data(cols as usize, (1..=rows*cols).collect());
         let m2: Matrix<i32> = Matrix::with_flat_data(rows as usize, (1..=rows*cols).rev().collect());
 
-        let expected = Matrix::with_data(vec![
-            vec![90, 114, 138],
-            vec![54, 69, 84],
-            vec![18, 24, 30],
-        ]);
+        // let expected = Matrix::with_data(vec![
+        //     vec![90, 114, 138],
+        //     vec![54, 69, 84],
+        //     vec![18, 24, 30],
+        // ]);
 
-        assert_eq!(expected, strassen_mul(&m1, &m2));
+        assert_eq!(naive_mul(&m1, &m2), strassen_mul(&m1, &m2));
     }
 
 
