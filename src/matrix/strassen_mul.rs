@@ -67,32 +67,13 @@ fn strassen_mul_impl(a: &Matrix<i32>, b: &Matrix<i32>) -> Matrix<i32> {
     // Third argument
     Matrix::add(&s4, &s5, &mut tmp3);
 
-    let result = connect_4_matrices(
+    return connect_4_matrices(
         &tmp1,
         &tmp2,
         &tmp3,
-        &tmp4
+        &tmp4,
+        a.cols() % 2 != 0
     );
-
-    if a.cols() % 2 != 0 {
-        return compress_matrix(&result);
-    }
-
-    return result;
-}
-
-
-fn compress_matrix(m: &Matrix<i32>) -> Matrix<i32> {
-    let mut result = Matrix::new(m.cols() - 1, m.rows() - 1);
-
-    // Copying data from input matrix
-    for col in 0..result.cols() {
-        for row in 0..result.rows() {
-            result[col][row] = m[col][row];
-        }
-    }
-
-    result
 }
 
 
@@ -147,35 +128,56 @@ fn explode_matrix_to_4(m: &Matrix<i32>) -> (Matrix<i32>, Matrix<i32>, Matrix<i32
 }
 
 
-fn connect_4_matrices(m11: &Matrix<i32>, m12: &Matrix<i32>, m21: &Matrix<i32>, m22: &Matrix<i32>) -> Matrix<i32> {
-    assert_eq!(m11.rows(), m21.rows(), "Invalid matrices sizes");
-    assert_eq!(m11.cols(), m12.cols(), "Invalid matrices sizes");
-    assert_eq!(m22.rows(), m12.rows(), "Invalid matrices sizes");
-    assert_eq!(m22.cols(), m21.cols(), "Invalid matrices sizes");
+fn connect_4_matrices(m11: &Matrix<i32>, m12: &Matrix<i32>, m21: &Matrix<i32>, m22: &Matrix<i32>, compress: bool) -> Matrix<i32> {
+    let mut result;
+    let m11_cols = m11.cols();
+    let m11_rows = m11.rows();
 
-    let mut result = Matrix::new(m11.cols() + m21.cols(), m11.rows() + m12.rows());
+    let m12_cols = m12.cols();
+    let m12_rows;
 
-    for col in 0..m11.cols() {
-        for row in 0..m11.rows() {
+    let m21_cols;
+    let m21_rows = m21.rows();
+
+    let m22_cols;
+    let m22_rows;
+
+    if compress {
+        result = Matrix::new(m11.cols() + m21.cols() - 1, m11.rows() + m12.rows() - 1);
+        m12_rows = m12.rows() - 1;
+        m21_cols = m21.cols() - 1;
+        m22_cols = m22.cols() - 1;
+        m22_rows = m22.rows() - 1;
+    }
+    else {
+        result = Matrix::new(m11.cols() + m21.cols(), m11.rows() + m12.rows());
+        m12_rows = m12.rows();
+        m21_cols = m21.cols();
+        m22_cols = m22.cols();
+        m22_rows = m22.rows();
+    }
+
+    for col in 0..m11_cols {
+        for row in 0..m11_rows {
             result[col][row] = m11[col][row];
         }
     }
 
-    for col in 0..m12.cols() {
-        for row in 0..m12.rows() {
-            result[col][row + m11.rows()] = m12[col][row];
+    for col in 0..m12_cols {
+        for row in 0..m12_rows {
+            result[col][row + m11_rows] = m12[col][row];
         }
     }
 
-    for col in 0..m21.cols() {
-        for row in 0..m21.rows() {
-            result[col + m11.cols()][row] = m21[col][row];
+    for col in 0..m21_cols {
+        for row in 0..m21_rows {
+            result[col + m11_cols][row] = m21[col][row];
         }
     }
 
-    for col in 0..m22.cols() {
-        for row in 0..m22.rows() {
-            result[col + m11.cols()][row + m11.rows()] = m22[col][row];
+    for col in 0..m22_cols {
+        for row in 0..m22_rows {
+            result[col + m11_cols][row + m11_rows] = m22[col][row];
         }
     }
 
@@ -252,7 +254,26 @@ mod tests {
             vec![11, 12, 15, 16]
         ]);
 
-        let m = connect_4_matrices(&m11, &m12, &m21, &m22);
+        let m = connect_4_matrices(&m11, &m12, &m21, &m22, false);
+
+        assert_eq!(expected, m);
+    }
+
+
+    #[test]
+    pub fn correct_connecting_4_matrices_with_compress() {
+        let m11 = Matrix::with_data(vec![vec![1, 2],  vec![3, 4]]);
+        let m12 = Matrix::with_data(vec![vec![5, 6],  vec![7, 8]]);
+        let m21 = Matrix::with_data(vec![vec![9, 10], vec![11, 12]]);
+        let m22 = Matrix::with_data(vec![vec![13, 14],vec![15, 16]]);
+
+        let expected = Matrix::with_data(vec![
+            vec![ 1,  2,  5],
+            vec![ 3,  4,  7],
+            vec![ 9, 10, 13],
+        ]);
+
+        let m = connect_4_matrices(&m11, &m12, &m21, &m22, true);
 
         assert_eq!(expected, m);
     }
@@ -312,7 +333,7 @@ mod tests {
         ]);
 
         let (m11, m12, m21, m22) = explode_matrix_to_4(&m1);
-        let m2 = connect_4_matrices(&m11, &m12, &m21, &m22);
+        let m2 = connect_4_matrices(&m11, &m12, &m21, &m22, false);
 
         assert_eq!(m1, m2)
     }
