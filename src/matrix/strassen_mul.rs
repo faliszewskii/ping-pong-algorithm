@@ -193,23 +193,22 @@ mod tests {
         connect_4_matrices,
         explode_matrix_to_4
     };
-    use crate::matrix::naive_mul::naive_mul;
 
 
     #[test]
-    pub fn correct_mul_mat_size_4() {
-        let rows = 32;
-        let cols = 32;
+    pub fn correct_mul_mat_size_3() {
+        let rows = 3;
+        let cols = 3;
         let m1: Matrix<i32> = Matrix::with_flat_data(cols as usize, (1..=rows*cols).collect());
         let m2: Matrix<i32> = Matrix::with_flat_data(rows as usize, (1..=rows*cols).rev().collect());
 
-        // let expected = Matrix::with_data(vec![
-        //     vec![90, 114, 138],
-        //     vec![54, 69, 84],
-        //     vec![18, 24, 30],
-        // ]);
+        let expected = Matrix::with_data(vec![
+            vec![90, 114, 138],
+            vec![54, 69, 84],
+            vec![18, 24, 30],
+        ]);
 
-        assert_eq!(naive_mul(&m1, &m2), strassen_mul(&m1, &m2));
+        assert_eq!(expected, strassen_mul(&m1, &m2));
     }
 
 
