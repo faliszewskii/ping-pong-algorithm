@@ -22,13 +22,32 @@ fn strassen_mul_impl(a: &Matrix<i32>, b: &Matrix<i32>) -> Matrix<i32> {
     (a11, a12, a21, a22) = explode_matrix_to_4(&a);
     (b11, b12, b21, b22) = explode_matrix_to_4(&b);
 
-    let s1 = strassen_mul(&(&a21 - &a22), &(&b12 + &b22));
-    let s2 = strassen_mul(&(&a11 + &a22), &(&b11 + &b22));
-    let s3 = strassen_mul(&(&a11 - &a12), &(&b11 + &b21));
-    let s4 = strassen_mul(&(&a11 + &a21), &b22);
-    let s5 = strassen_mul(&a11, &(&b21 - &b22));
-    let s6 = strassen_mul(&a22, &(&b12 - &b11));
-    let s7 = strassen_mul(&(&a12 + &a22), &b11);
+    let mut tmp1 = Matrix::new(a11.cols(), a11.rows());
+    let mut tmp2 = Matrix::new(a11.cols(), a11.rows());
+
+    Matrix::sub(&a21, &a22, &mut tmp1);
+    Matrix::add(&b12, &b22, &mut tmp2);
+    let s1 = strassen_mul(&tmp1, &tmp2);
+
+    Matrix::add(&a11, &a22, &mut tmp1);
+    Matrix::add(&b11, &b22, &mut tmp2);
+    let s2 = strassen_mul(&tmp1, &tmp2);
+
+    Matrix::sub(&a11, &a12, &mut tmp1);
+    Matrix::add(&b11, &b21, &mut tmp2);
+    let s3 = strassen_mul(&tmp1, &tmp2);
+
+    Matrix::add(&a11, &a21, &mut tmp1);
+    let s4 = strassen_mul(&tmp1, &b22);
+
+    Matrix::sub(&b21, &b22, &mut tmp2);
+    let s5 = strassen_mul(&a11, &tmp2);
+
+    Matrix::sub(&b12, &b11, &mut tmp2);
+    let s6 = strassen_mul(&a22, &tmp2);
+
+    Matrix::add(&a12, &a22, &mut tmp1);
+    let s7 = strassen_mul(&tmp1, &b11);
 
     let result = connect_4_matrices(
         &(&(&s1 + &s2) - &(&s4 - &s6)),
