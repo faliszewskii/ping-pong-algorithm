@@ -82,6 +82,45 @@ impl<T> Matrix<T> where T: Default, T: Clone {
     }
 }
 
+
+impl<T> Matrix<T> where
+    T: Default,
+    T: Clone,
+    T: Copy,
+    T: Add<Output = T>,
+{
+    pub fn add(m1: &Matrix<T>, m2: &Matrix<T>, result: &mut Matrix<T>) {
+        assert!(m1.cols == m2.cols && m2.cols == result.cols);
+        assert!(m1.rows == m2.rows && m2.rows == result.rows);
+
+        for col in 0..m1.cols {
+            for row in 0..m1.rows {
+                result[col][row] = m1[col][row] + m2[col][row];
+            }
+        }
+    }
+}
+
+
+impl<T> Matrix<T> where
+    T: Default,
+    T: Clone,
+    T: Copy,
+    T: Sub<Output = T>,
+{
+    pub fn sub(m1: &Matrix<T>, m2: &Matrix<T>, result: &mut Matrix<T>) {
+        assert!(m1.cols == m2.cols && m2.cols == result.cols);
+        assert!(m1.rows == m2.rows && m2.rows == result.rows);
+
+        for col in 0..m1.cols {
+            for row in 0..m1.rows {
+                result[col][row] = m1[col][row] - m2[col][row];
+            }
+        }
+    }
+}
+
+
 impl<T: fmt::Debug + Clone > fmt::Debug for Matrix<T> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         writeln!(f, "Matrix ({}x{}):", self.cols, self.rows)?;
@@ -117,11 +156,7 @@ impl<T: Sub<Output = T> + Copy + Default> Sub for &Matrix<T> {
 
         let mut result = Matrix::new(self.cols, self.rows);
 
-        for col in 0..self.cols {
-            for row in 0..self.rows {
-                result[col][row] = self[col][row] - rhs[col][row];
-            }
-        }
+        Matrix::sub(self, rhs, &mut result);
 
         result
     }
@@ -138,11 +173,7 @@ impl<T: Add<Output = T> + Copy + Default> Add for &Matrix<T>
 
         let mut result = Matrix::new(self.cols, self.rows);
 
-        for col in 0..self.cols {
-            for row in 0..self.rows {
-                result[col][row] = self[col][row] + rhs[col][row];
-            }
-        }
+        Matrix::add(self, rhs, &mut result);
 
         result
     }
