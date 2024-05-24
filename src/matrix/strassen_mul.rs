@@ -7,7 +7,7 @@ pub fn strassen_mul(a: &Matrix<i32>, b: &Matrix<i32>) -> Matrix<i32> {
     assert_eq!(a.cols(), a.rows(), "Only square matrices are supported");
     assert_eq!(b.cols(), b.rows(), "Only square matrices are supported");
 
-    if a.cols() <= 512 {
+    if a.cols() <= 32 {
         return naive_mul(&a, &b);
     }
     
