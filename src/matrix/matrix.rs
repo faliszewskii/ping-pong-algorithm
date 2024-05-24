@@ -197,12 +197,12 @@ mod tests {
     }
 
     #[test]
-    fn referencing_row() {
+    fn referencing_col() {
         let rows = 3;
         let cols = 4;
         let m: Matrix<u32> = Matrix::with_flat_data(cols as usize, (1..=rows*cols).collect());
 
-        let middle_row: Vec<_> = (5..9).collect();
+        let middle_row: Vec<_> = (4..7).collect();
 
         assert_eq!(middle_row, &m[1]);
     }
@@ -213,7 +213,7 @@ mod tests {
         let cols = 4;
         let m: Matrix<i32> = Matrix::with_flat_data(cols as usize, (1..=rows*cols).collect());
 
-        let middle_element = 7;
+        let middle_element = 6;
 
         assert_eq!(middle_element, m[1][2]);
     }
@@ -224,7 +224,7 @@ mod tests {
         let cols = 4;
         let mut m: Matrix<i32> = Matrix::with_flat_data(cols as usize, (1..=rows*cols).collect());
 
-        let middle_element = 7;
+        let middle_element = 6;
         assert_eq!(middle_element, m[1][2]);
 
         let new_element = 99;
