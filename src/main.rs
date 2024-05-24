@@ -58,7 +58,7 @@ fn main() {
             }
         }
         ConsoleArguments::Generate(generate_args) => {
-            let graphs = generate_args.sizes.iter().map(|size| generate_ping_pong(*size, 0.01)).collect();
+            let graphs = generate_args.sizes.iter().map(|size| generate_ping_pong(*size, 0.5)).collect();
             save_graphs_to_file(graphs, generate_args.output_file);
         }
     }
