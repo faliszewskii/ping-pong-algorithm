@@ -1,6 +1,6 @@
 use clap::{Arg, ArgAction, ArgMatches, Command};
 use crate::console_arguments::{ConsoleArguments, GenerateArguments, SolveArguments};
-use crate::console_arguments::MultiplicationMethod::{Naive, Strassen};
+use crate::console_arguments::MultiplicationMethod::{Naive, Strassen, Mixed};
 
 pub fn parse_console_arguments() -> ConsoleArguments {
     let matches = construct_command().get_matches();
@@ -30,7 +30,12 @@ fn construct_arguments(matches: ArgMatches) -> ConsoleArguments {
                 None
             };
 
-            let mul_method = if opts.get_flag("naive") { Naive } else { Strassen };
+            let mul_method = if opts.get_flag("naive")
+                { Naive }
+            else if opts.get_flag("strassen")
+                { Strassen }
+            else    
+                { Mixed };
 
             let verbose = opts.get_flag("verbose");
 
@@ -117,6 +122,7 @@ fn construct_command() -> Command {
                         .long("strassen")
                         .help("Use strassen multiplication method (default)")
                         .conflicts_with("naive")
+                        .conflicts_with("mixed")
                         .action(ArgAction::SetTrue)
                         .num_args(0)
                 )
@@ -124,6 +130,16 @@ fn construct_command() -> Command {
                     Arg::new("naive")
                         .long("naive")
                         .help("Use naive multiplication method")
+                        .conflicts_with("strassen")
+                        .conflicts_with("mixed")
+                        .action(ArgAction::SetTrue)
+                        .num_args(0)
+                )
+                .arg(
+                    Arg::new("mixed")
+                        .long("mixed")
+                        .help("Use multiplication, which combines naive and strassen methods for better performance")
+                        .conflicts_with("naive")
                         .conflicts_with("strassen")
                         .action(ArgAction::SetTrue)
                         .num_args(0)
