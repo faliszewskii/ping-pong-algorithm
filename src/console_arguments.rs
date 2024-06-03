@@ -2,7 +2,8 @@
 #[derive(Debug)]
 pub enum MultiplicationMethod  {
     Naive,
-    Strassen
+    Strassen,
+    Mixed
 }
 
 #[derive(Debug)]
